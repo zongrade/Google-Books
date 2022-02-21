@@ -1,0 +1,17 @@
+.books {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  //justify-items: center;
+}
+.imgBooks {
+}
+img {
+  height: 100%;
+}
+.imgContainer {
+  height: 40%;
+}
+.bookContainer {
+  width: 100%;
+  height: 100%;
+}
