@@ -1,7 +1,7 @@
 import { element, string } from 'prop-types'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { saveResponce, zeroResponce } from '../redux/store'
+import { saveNewResponce, saveResponce, zeroResponce } from '../redux/store'
 import classes from './style/app.module.scss'
 interface book {
   accessInfo: {
@@ -22,6 +22,7 @@ interface book {
     categories: string[]
     authors: string[]
   }
+  etag: string
 }
 interface responce {
   totalItems: number
@@ -36,7 +37,7 @@ const App = () => {
   const [search, setSearch] = useState('')
   const [categories, setCategories] = useState('all')
   const [startIndex, setStartIndex] = useState(0)
-  const [countResults, setCountResults] = useState(6)
+  const [countResults, setCountResults] = useState(30)
   const [bookData, setBookData] = useState({
     totalItems: [' '],
     items: [
@@ -61,7 +62,7 @@ const App = () => {
   function smthHandler(e: any) {
     console.log(e)
   }
-  function requestBooks() {
+  function requestBooks(fn: Function) {
     setLoading(false)
     fetch(
       `https://www.googleapis.com/books/v1/volumes?q=${
@@ -77,7 +78,7 @@ const App = () => {
       .then((data: responce) => {
         console.log(data)
         if (data.totalItems > 0) {
-          dispatch(saveResponce(data))
+          dispatch(fn(data))
         } else {
           dispatch(zeroResponce())
         }
@@ -87,11 +88,15 @@ const App = () => {
       .finally(() => setLoading(true))
   }
   useEffect(() => {
-    requestBooks()
+    if (!startIndex) {
+      requestBooks(saveNewResponce)
+    } else {
+      requestBooks(saveResponce)
+    }
   }, [isSearching, startIndex])
   function handleSubmit(e: { preventDefault: any }) {
     e.preventDefault()
-    //setCountResults(30)
+    setStartIndex(0)
     setIsSearching((prev) => !prev)
   }
   return (
@@ -143,11 +148,12 @@ const App = () => {
             {console.log(booksData)}
             {!Array.isArray(booksData.totalItems) ? (
               booksData.items.map((data: book) => (
-                <div className={classes.bookContainer} key={data.id}>
+                <div
+                  className={classes.bookContainer}
+                  key={data.id + data.etag}
+                >
                   <div className={classes.imgContainer}>
                     <img
-                      key={data.id}
-                      //className={classes.imgBooks}
                       src={
                         data.volumeInfo.imageLinks?.smallThumbnail ||
                         'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'
@@ -179,7 +185,9 @@ const App = () => {
       <button
         onClick={() => {
           //setCountResults((prev) => prev + 30)
-          setStartIndex((prev) => prev + 30)
+          if (booksData.totalItems > startIndex + countResults) {
+            setStartIndex((prev) => prev + 30)
+          }
         }}
       >
         Show More

@@ -54,8 +54,10 @@ const asyncReducer = (state: responce = defaultState, action: action) => {
       if (state.items[0].id === '') {
         return { ...state, ...action.payload }
       } else {
-        return { ...state, items: [...action.payload.items] }
+        return { ...state, items: [...state.items, ...action.payload.items] }
       }
+    case 'newResponce':
+      return { ...action.payload }
     case 'zeroResponce':
       return { ...defaultState }
     default:
@@ -66,6 +68,17 @@ export function zeroResponce() {
   return function (dispatch: any) {
     dispatch({
       type: 'zeroResponce',
+    })
+  }
+}
+export function saveNewResponce(data: any) {
+  return function (dispatch: any) {
+    dispatch({
+      type: 'newResponce',
+      payload: {
+        items: data.items,
+        totalItems: data.totalItems,
+      },
     })
   }
 }
