@@ -12,7 +12,7 @@ module.exports = {
   },
   output: {
     filename: '[name].[fullhash].js',
-    path: path.resolve(__dirname, '../build'),
+    path: path.resolve(__dirname, '../docs'),
     clean: true,
     publicPath: '/',
   },
@@ -25,7 +25,7 @@ module.exports = {
       patterns: [
         {
           from: path.resolve(__dirname, './src'),
-          to: path.resolve(__dirname, './build'),
+          to: path.resolve(__dirname, './docs'),
           noErrorOnMissing: true,
         },
       ],
